@@ -1,7 +1,7 @@
 # version 1 - WebSphere for Developers install on a docker container. The base image used already contains Installation Manager installed. Check my previous post to
 # see how the base image was generated: https://www.ibm.com/developerworks/community/blogs/devTips/entry/ibm_installation_manager_in_silent_mode_no_x_on_linux_quick_reference?lang=en
 # WebSphere for developer can be downloaded from IBM web site: http://www.ibm.com/developerworks/downloads/ws/wasdevelopers/
-# by mmaia - mpais@br.ibm.com, maia.marcos@gmail.com
+# by mmaia - mpais@br.ibm.com, maia.marcos@gmail.com (original author)
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,11 +31,11 @@
 # and if needed to attach to the running container
 # docker attach $CONTAINER_NAME
 
-FROM mmaia/im_ibm:v1
-MAINTAINER Marcos Maia "mpais@br.ibm.com / maia.marcos@gmail.com"
+FROM jjacobso/ibm-im:latest
+MAINTAINER John Jacobson "jjacobso@us.ibm.com/jjacobso@gmail.com"
 
 #copy files to docker image
-COPY *.zip tmp/
+COPY was_part*.zip tmp/
 
 # preparing the files to install, unzipping and creating correct directory structures for WAS  and deleting the
 # zip files that are not necessary anymore so disk image doesn't get without space (docker limit to 10GB by now)
@@ -52,9 +52,12 @@ COPY install_response_file.xml tmp/install_response_file.xml
 RUN cd /opt/IBM/InstallationManager/eclipse/tools && ./imcl -acceptLicense input /tmp/install_response_file.xml -log /tmp/install_log.xml
 RUN rm -rf tmp/was && rm -rf tmp/install_response_file.xml
 
+# db2 drivers
+COPY db2jcc* /opt/IBM/WebSphere/AppServer/lib/ext/
+
 # now we're going to create a default profile(USING ALL DEFAULT) so we can finally plan on running WAS DEV in this image...
 # this will create a profile named AppSrv01 under AppServer/profiles directory...
-RUN /opt/IBM/WebSphere8.5.5_Dev/AppServer/bin/manageprofiles.sh -create -templatePath /opt/IBM/WebSphere8.5.5_Dev/AppServer/profileTemplates/default
+RUN /opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -create -templatePath /opt/IBM/WebSphere/AppServer/profileTemplates/default
 
 # Let's expose at least HTTP and Dmgr(Admin) ports for this profile
 EXPOSE 9080 9060
