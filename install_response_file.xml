@@ -6,8 +6,8 @@
   <server>
     <repository location='/tmp/was'/>
   </server>
-  <profile id='IBM WebSphere Application Server V8.5' installLocation='/opt/IBM/WebSphere8.5.5_Dev/AppServer'>
-    <data key='eclipseLocation' value='/opt/IBM/WebSphere8.5.5_Dev/AppServer'/>
+  <profile id='IBM WebSphere Application Server V8.5' installLocation='/opt/IBM/WebSphere/AppServer'>
+    <data key='eclipseLocation' value='/opt/IBM/WebSphere/AppServer'/>
     <data key='user.import.profile' value='false'/>
     <data key='cic.selector.os' value='linux'/>
     <data key='cic.selector.arch' value='x86'/>
