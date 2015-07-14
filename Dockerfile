@@ -34,23 +34,28 @@
 FROM jjacobso/ibm-im:latest
 MAINTAINER John Jacobson "jjacobso@us.ibm.com/jjacobso@gmail.com"
 
-#copy files to docker image
-COPY was_part*.zip tmp/
+# Copy the was response file
+COPY install_response_file.xml tmp/install_response_file.xml
+
+# create directory for the below ADD command
+RUN mkdir /tmp/was
+
+# unzip files to tmp/was 
+ADD was_part*.zip tmp/was
 
 # preparing the files to install, unzipping and creating correct directory structures for WAS  and deleting the
 # zip files that are not necessary anymore so disk image doesn't get without space (docker limit to 10GB by now)
-RUN cd tmp && mkdir was && unzip was_part1.zip -d was && rm -rf was_part1.zip && unzip was_part2.zip -d was  \
-    && rm -rf was_part2.zip && unzip was_part3.zip -d was && rm -rf was_part3.zip
+#RUN cd tmp && mkdir was && unzip was_part1.zip -d was && rm -rf was_part1.zip && unzip was_part2.zip -d was  \
+#    && rm -rf was_part2.zip && unzip was_part3.zip -d was && rm -rf was_part3.zip
 
 # now that WAS dev is ready to be installed by IBM Installation manager we need to execute the I.M command to install it
 # we're going to use a silent installation file to accomplish that so we copy a response file to configure the installation
 # to the tmp directory in the docker image
-COPY install_response_file.xml tmp/install_response_file.xml
+# COPY install_response_file.xml tmp/install_response_file.xml <added this to previous COPY command>
 
 # now we execute the installation manager instruction to use this response file and the was repo we've created and execute the installation.
 # and than when the installation is done we delete the repository so the image doesn't get tooooo big(it's big anyway :) )
-RUN cd /opt/IBM/InstallationManager/eclipse/tools && ./imcl -acceptLicense input /tmp/install_response_file.xml -log /tmp/install_log.xml
-RUN rm -rf tmp/was && rm -rf tmp/install_response_file.xml
+RUN cd /opt/IBM/InstallationManager/eclipse/tools && ./imcl -acceptLicense input /tmp/install_response_file.xml -log /tmp/install_log.xml && rm -rf tmp/was && rm -rf tmp/install_response_file.xml
 
 # db2 drivers
 COPY db2jcc* /opt/IBM/WebSphere/AppServer/lib/ext/
